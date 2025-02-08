@@ -37,22 +37,12 @@ jobs:
       - name: Build and Package Maven
         id: package
         working-directory: ${{ env.applicationfolder }}
-        run: |
-          echo "Running Maven Build"
-          mvn clean package -DskipTests
-          ls -alh target # Debugging line to check if target exists after the build step
-          echo "Checking for WAR file..."
-          if ls target/*.war 1> /dev/null 2>&1; then
-            echo "WAR file found."
-          else
-            echo "No .war file found. Exiting."
-            exit 1
-          fi
+        run: $GITHUB_WORKSPACE/.github/scripts/build.sh
 
-      - name: Create TAR Archive of the WAR File
+      - name: Package WAR file into ZIP
         run: |
-          if [ -d "$GITHUB_WORKSPACE/target" ] && ls $GITHUB_WORKSPACE/target/*.war 1> /dev/null 2>&1; then
-            tar -cvf $GITHUB_WORKSPACE/target/app.tar $GITHUB_WORKSPACE/target/*.war
+          if [ -d "$GITHUB_WORKSPACE/${{ env.applicationfolder }}/target" ] && ls $GITHUB_WORKSPACE/${{ env.applicationfolder }}/target/*.war 1> /dev/null 2>&1; then
+            zip -r $GITHUB_WORKSPACE/${{ env.applicationfolder }}/target/app.zip $GITHUB_WORKSPACE/${{ env.applicationfolder }}/target/*.war
           else
             echo "No .war file found. Exiting."
             exit 1
@@ -60,7 +50,7 @@ jobs:
 
       - name: Upload Artifact to S3
         working-directory: ${{ env.applicationfolder }}/target
-        run: aws s3 cp app.tar s3://$S3BUCKET/
+        run: aws s3 cp app.zip s3://$S3BUCKET/
 
   deploy:
     needs: build
@@ -87,5 +77,5 @@ jobs:
           aws deploy create-deployment \
             --application-name CodeDeployAppNameWithASG \
             --deployment-group-name CodeDeployGroupName \
-            --s3-location bucket=$S3BUCKET,bundleType=tar,key=app.tar \
+            --s3-location bucket=$S3BUCKET,bundleType=zip,key=app.zip \
             --ignore-application-stop-failures
