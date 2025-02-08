@@ -39,8 +39,15 @@ jobs:
         working-directory: ${{ env.applicationfolder }}
         run: mvn clean package -DskipTests # or your actual build command
 
-      - name: List files in target directory
-        run: ls -alh $GITHUB_WORKSPACE/target
+      - name: Check if target directory exists
+        run: |
+          if [ -d "$GITHUB_WORKSPACE/target" ]; then
+            echo "Target directory exists!"
+            ls -alh $GITHUB_WORKSPACE/target
+          else
+            echo "Target directory does not exist. Exiting."
+            exit 1
+          fi
 
       - name: Zip the WAR file
         run: |
