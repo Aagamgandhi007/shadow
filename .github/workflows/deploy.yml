@@ -39,8 +39,15 @@ jobs:
         working-directory: ${{ env.applicationfolder }}
         run: |
           echo "Running Maven Build"
-          mvn clean package -DskipTests # or your actual build command
+          mvn clean package -DskipTests
           ls -alh target # Debugging line to check if target exists after the build step
+          echo "Checking for WAR file..."
+          if ls target/*.war 1> /dev/null 2>&1; then
+            echo "WAR file found."
+          else
+            echo "No .war file found. Exiting."
+            exit 1
+          fi
 
       - name: Create TAR Archive of the WAR File
         run: |
