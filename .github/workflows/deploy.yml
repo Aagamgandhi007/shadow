@@ -22,7 +22,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::739275462844:role/CodeDeployStack-CodeDeployRole-7mSka2PTsVri # Using your provided ARN
+          role-to-assume: arn:aws:iam::739275462844:role/CodeDeployStack-CodeDeployRole-7mSka2PTsVri
           role-session-name: GitHub-Action-Role
           aws-region: ca-central-1
 
@@ -39,9 +39,12 @@ jobs:
         working-directory: ${{ env.applicationfolder }}
         run: $GITHUB_WORKSPACE/.github/scripts/build.sh
 
+      - name: Zip the WAR file
+        run: zip ${GITHUB_WORKSPACE}/target/app.zip ${GITHUB_WORKSPACE}/target/*.war
+
       - name: Upload Artifact to S3
         working-directory: ${{ env.applicationfolder }}/target
-        run: aws s3 cp *.war s3://codedeploystack-webappdeploymentbucket-817wvzok0o1i/
+        run: aws s3 cp app.zip s3://codedeploystack-webappdeploymentbucket-817wvzok0o1i/
 
   deploy:
     needs: build
@@ -57,7 +60,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::739275462844:role/CodeDeployStack-CodeDeployRole-7mSka2PTsVri # Using your provided ARN
+          role-to-assume: arn:aws:iam::739275462844:role/CodeDeployStack-CodeDeployRole-7mSka2PTsVri
           role-session-name: GitHub-Action-Role
           aws-region: ca-central-1
 
@@ -68,5 +71,5 @@ jobs:
           aws deploy create-deployment \
             --application-name CodeDeployAppNameWithASG \
             --deployment-group-name CodeDeployGroupName \
-            --s3-location bucket=$S3BUCKET,bundleType=war,key=${{ github.ref_name }}.war \
+            --s3-location bucket=$S3BUCKET,bundleType=zip,key=app.zip \
             --ignore-application-stop-failures
