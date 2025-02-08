@@ -39,8 +39,17 @@ jobs:
         working-directory: ${{ env.applicationfolder }}
         run: $GITHUB_WORKSPACE/.github/scripts/build.sh
 
+      - name: List files in target directory
+        run: ls -alh $GITHUB_WORKSPACE/target
+
       - name: Zip the WAR file
-        run: zip ${GITHUB_WORKSPACE}/target/app.zip ${GITHUB_WORKSPACE}/target/*.war
+        run: |
+          if ls $GITHUB_WORKSPACE/target/*.war 1> /dev/null 2>&1; then
+            zip ${GITHUB_WORKSPACE}/target/app.zip ${GITHUB_WORKSPACE}/target/*.war
+          else
+            echo "No .war file found. Exiting."
+            exit 1
+          fi
 
       - name: Upload Artifact to S3
         working-directory: ${{ env.applicationfolder }}/target
