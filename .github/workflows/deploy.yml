@@ -22,7 +22,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::123456789012:role/YourIAMRoleName
+          role-to-assume: arn:aws:iam::739275462844:role/CodeDeployStack-CodeDeployRole-7mSka2PTsVri # Using your provided ARN
           role-session-name: GitHub-Action-Role
           aws-region: ca-central-1
 
@@ -57,7 +57,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::123456789012:role/YourIAMRoleName
+          role-to-assume: arn:aws:iam::739275462844:role/CodeDeployStack-CodeDeployRole-7mSka2PTsVri # Using your provided ARN
           role-session-name: GitHub-Action-Role
           aws-region: ca-central-1
 
