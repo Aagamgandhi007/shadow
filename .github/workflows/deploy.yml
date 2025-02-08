@@ -22,7 +22,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: ${{ secrets.IAMROLE_GITHUB }}
+          role-to-assume: arn:aws:iam::123456789012:role/YourIAMRoleName
           role-session-name: GitHub-Action-Role
           aws-region: ca-central-1
 
@@ -57,7 +57,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: ${{ secrets.IAMROLE_GITHUB }}
+          role-to-assume: arn:aws:iam::123456789012:role/YourIAMRoleName
           role-session-name: GitHub-Action-Role
           aws-region: ca-central-1
 
@@ -68,5 +68,5 @@ jobs:
           aws deploy create-deployment \
             --application-name CodeDeployAppNameWithASG \
             --deployment-group-name CodeDeployGroupName \
-            --github-location repository=$GITHUB_REPOSITORY,commitId=$commit_hash \
+            --s3-location bucket=$S3BUCKET,bundleType=war,key=${{ github.ref_name }}.war \
             --ignore-application-stop-failures
