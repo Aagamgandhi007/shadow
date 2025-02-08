@@ -42,10 +42,10 @@ jobs:
           mvn clean package -DskipTests # or your actual build command
           ls -alh target # Debugging line to check if target exists after the build step
 
-      - name: Zip the WAR file
+      - name: Create TAR Archive of the WAR File
         run: |
           if [ -d "$GITHUB_WORKSPACE/target" ] && ls $GITHUB_WORKSPACE/target/*.war 1> /dev/null 2>&1; then
-            zip -r $GITHUB_WORKSPACE/target/app.zip $GITHUB_WORKSPACE/target/*.war
+            tar -cvf $GITHUB_WORKSPACE/target/app.tar $GITHUB_WORKSPACE/target/*.war
           else
             echo "No .war file found. Exiting."
             exit 1
@@ -53,7 +53,7 @@ jobs:
 
       - name: Upload Artifact to S3
         working-directory: ${{ env.applicationfolder }}/target
-        run: aws s3 cp app.zip s3://$S3BUCKET/
+        run: aws s3 cp app.tar s3://$S3BUCKET/
 
   deploy:
     needs: build
@@ -80,5 +80,5 @@ jobs:
           aws deploy create-deployment \
             --application-name CodeDeployAppNameWithASG \
             --deployment-group-name CodeDeployGroupName \
-            --s3-location bucket=$S3BUCKET,bundleType=zip,key=app.zip \
+            --s3-location bucket=$S3BUCKET,bundleType=tar,key=app.tar \
             --ignore-application-stop-failures
